@@ -1,3 +1,9 @@
+'''
+Splitter function for decision tree classifiers.
+
+author: David Thaler
+date: August 2017
+'''
 import numpy as np
 
 
@@ -11,7 +17,7 @@ def split(x, y):
         y: m-element 1-D numpy array of labels; must be 0-1.
 
     Returns:
-        2-tuple of feature index and split threshold.
+        3-tuple of feature index, split threshold and impurity of best split.
     '''
     m, n = x.shape
     best_feature = -1
