@@ -18,8 +18,8 @@ def split(x, y):
     best_thr = 0.0
     best_score = 0.5
     # Iterate over features of x
-    for j in range(n):
-        f = x[:, j]
+    for feature_idx in range(n):
+        f = x[:, feature_idx]
         cts = {}
         pos = {}
         neg = {}
@@ -49,7 +49,7 @@ def split(x, y):
             gini_right = 1 - (npos_right/n_right)**2 - (nneg_right/n_right)**2
             gini_split = (n_left/m) * gini_left + (n_right/m) * gini_right
             if gini_split < best_score:
-                best_feature = j
+                best_feature = feature_idx
                 best_thr = 0.5 * (g[k] + g[k+1])
                 best_score = gini_split
     return (best_feature, best_thr, best_score)
