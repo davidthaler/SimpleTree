@@ -1,6 +1,5 @@
 import numpy as np
-from collections import Counter
-import pdb
+
 
 def split(x, y):
     '''
@@ -21,15 +20,14 @@ def split(x, y):
     # Iterate over features of x
     for j in range(n):
         f = x[:, j]
-        # TODO: get the Counters out of here to help numba out
-        cts = Counter()
-        pos = Counter()
-        neg = Counter()
+        cts = {}
+        pos = {}
+        neg = {}
         # get totals, positives and negatives for each *unique* value in f
         for k in range(m):
-            cts[f[k]] += 1
-            pos[f[k]] += y[k]
-            neg[f[k]] += (1 - y[k])
+            cts[f[k]] = cts.get(f[k], 0) + 1
+            pos[f[k]] = pos.get(f[k], 0) + y[k]
+            neg[f[k]] = neg.get(f[k], 0) + (1 - y[k])
         # We start with all data on the right
         n_left = 0                           # number of data points on left branch
         npos_left = 0                        # number of positives on left
@@ -41,7 +39,6 @@ def split(x, y):
         # range(len(g) - 1) omits the split with an empty right branch
         for k in range(len(g) - 1):
             val = g[k]
-            #pdb.set_trace()
             n_left += cts[val]
             n_right -= cts[val]
             npos_left += pos[val]
