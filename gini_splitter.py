@@ -10,7 +10,6 @@ date: August 2017
 import numpy as np
 import numba
 
-# TODO: handle case of one unique value in a field
 
 @numba.jit(nopython=True)
 def split(x, y):
@@ -32,6 +31,8 @@ def split(x, y):
     # Iterate over features of x
     for feature_idx in range(n):
         f = x[:, feature_idx]
+        if (f == f[0]).all():
+            continue
         sort_idx = f.argsort()
         fsort = f[sort_idx]
         ysort = y[sort_idx]
