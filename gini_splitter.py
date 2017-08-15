@@ -10,6 +10,7 @@ date: August 2017
 import numpy as np
 import numba
 
+# TODO: handle case of one unique value in a field
 
 @numba.jit(nopython=True)
 def split(x, y):
