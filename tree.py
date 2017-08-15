@@ -29,7 +29,5 @@ def build_tree(x, y):
     x_right = x[right_mask]
     y_right = y[right_mask]
     right_tree = build_tree(x_right, y_right)
-    right_tree = build_tree(x_right, y_right)
     root = np.array([[feature, thr, ct, pos]])
     return np.concatenate([root, left_tree, right_tree])
-    
