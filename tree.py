@@ -54,6 +54,17 @@ def build_tree(x, y, node_num=0):
 
 @numba.jit
 def apply(tree, x):
+    '''
+    Finds the node number in the provided tree (from build_tree) that each
+    instance in x lands in.
+
+    Args:
+        tree: the array returned by build_tree
+        x: m x n numpy array of numeric features
+
+    Returns:
+        1-D numpy array (dtype int) of leaf node numbers for each point in x.
+    '''
     out = np.zeros(len(x))
     for k in range(len(x)):
         node = 0                                    # the root
@@ -65,4 +76,39 @@ def apply(tree, x):
             else:
                 node = int(tree[node, CHILD_RIGHT_COL])
         out[k] = node
-    return out
+    return out.astype(int)
+
+
+def predict_proba(tree, x):
+    '''
+    Predicts the probability of class 1 membership for each row in x
+    using the provided tree from build_tree.
+
+    Args:
+        tree: the array returned by build_tree
+        x: m x n numpy array of numeric features
+
+    Returns:
+        1-D numpy array (dtype float) of probabilities of class 1 membership.
+    '''
+    leaf_idx = apply(tree, x)
+    tot = tree[leaf_idx, CT_COL]
+    pos = tree[leaf_idx, POS_COL]
+    return pos / tot
+
+
+def predict(tree, x):
+    '''
+    Makes 0/1 predictions for the data x using the provided tree
+    from build_tree.
+
+    NB: predicts p=0.5 as False
+
+    Args:
+        tree: the array returned by build_tree
+        x: m x n numpy array of numeric features
+
+    Returns:
+        1-D numpy array (dtype float) of 0.0 and 1.0 for the two classes.
+    '''
+    return (predict_proba(tree, x) > 0.5).astype(int)
