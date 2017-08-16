@@ -1,8 +1,7 @@
 '''
-This version of the gini_splitter avoids using a dict(), which forces 
-numba into object mode, and np.unique, which is not supported in numba.
-It runs about 50x faster (in numba) on the iris data that the earlier 
-python version of gini_splitter.
+The split function here finds splits that minimize gini impurity.
+It runs under numba for speed, since these are the innermost loops in 
+decision tree fitting.
 
 author: David Thaler
 date: August 2017
