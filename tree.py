@@ -58,6 +58,8 @@ def apply(tree, x):
     Finds the node number in the provided tree (from build_tree) that each
     instance in x lands in.
 
+    NB: using numba.jit w/o nopython=True option allows astype(int) at end
+
     Args:
         tree: the array returned by build_tree
         x: m x n numpy array of numeric features
