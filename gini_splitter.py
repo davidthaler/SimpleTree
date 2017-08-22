@@ -8,7 +8,7 @@ date: August 2017
 '''
 import numpy as np
 import numba
-
+import pdb
 
 @numba.jit(nopython=True)
 def split(x, y):
@@ -24,12 +24,13 @@ def split(x, y):
         3-tuple of feature index, split threshold and impurity of best split.
     '''
     m, n = x.shape
-    best_feature = -1
+    best_feature = -1.0
     best_thr = 0.0
-    best_score = 0.5
+    best_score = 1 - (y.sum() / m)**2 - ((m - y.sum()) / m)**2
     # Iterate over features of x
     for feature_idx in range(n):
         f = x[:, feature_idx]
+        # ensures at least 2 uniques (1 split) in x
         if (f == f[0]).all():
             continue
         sort_idx = f.argsort()
