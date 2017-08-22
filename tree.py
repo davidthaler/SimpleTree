@@ -1,7 +1,6 @@
 import numpy as np
 from gini_splitter import split
 import numba
-import pdb
 
 # Position constants for the fields in the tree
 FEATURE_COL = 0
@@ -38,11 +37,9 @@ def build_tree(x, y, node_num=0):
     '''
     ct = len(y)
     pos = y.sum()
-    feature = -1
-    thr = 0.0
-    if pos == 0 or pos == ct:
-        return np.array([[feature, thr, ct, pos, node_num, -1, -1]])
     feature, thr, _ = split(x, y)
+    if feature == -1.0:
+        return np.array([[feature, thr, ct, pos, node_num, -1, -1]])
     mask = x[:, feature] <= thr
     left_root = node_num + 1
     left_tree = build_tree(x[mask], y[mask], left_root)
