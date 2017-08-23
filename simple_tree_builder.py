@@ -1,7 +1,8 @@
 '''
 These functions build a decision tree, which is output as a table 
 contained in a numpy array.
-    Columns:
+
+Column definitions:
     0) Split feature, -1 if leaf
     1) Split threshold
     2) Number of data points in this node
@@ -37,14 +38,7 @@ def build_tree(x, y, node_num=0):
     Recursively build a decision tree. 
     Returns a 2-D array of shape (num_nodes x 7) that describes the tree.
     Each row represents a node in pre-order (root, left, right).
-    Columns:
-    0) Split feature, -1 if leaf
-    1) Split threshold
-    2) Number of data points in this node
-    3) Number of positives in this node
-    4) Node number of this node (nodes are numbered in pre-order).
-    5) Node number of left child, -1 if leaf
-    6) Node number of right child, -1 if leaf
+    See the module comment for the column definitions.
 
     Args:
         x: m x n numpy array of numeric features
