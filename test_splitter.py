@@ -1,5 +1,6 @@
 '''
 A few tests to verify behavior of the simple_splitter.
+NB: the splitter also gets excersized by the tree tests on real data (irises).
 
 To run:
 
@@ -17,7 +18,6 @@ date: August 2017
 import pytest
 import numpy as np
 from simple_splitter import split
-
 
 '''
 Test Data:
@@ -60,5 +60,6 @@ def test_perfect():
     assert(result == (4, 2.5))
 
 def test_imperfect():
+    # Find first of 2 (equivalent) imperfect splits in columns 2 and 3.
     result = split(x[:, :-1], y)
     assert(result == (2, 3.5))
