@@ -8,7 +8,7 @@ date: August 2017
 '''
 import numpy as np
 import numba
-import pdb
+
 
 @numba.jit(nopython=True)
 def split(x, y):
@@ -21,11 +21,12 @@ def split(x, y):
         y: m-element 1-D numpy array of labels; must be 0-1.
 
     Returns:
-        3-tuple of feature index, split threshold and impurity of best split.
+        2-tuple of feature index and split threshold of best split.
     '''
     m, n = x.shape
     best_feature = -1
     best_thr = 0.0
+    # the Gini impurity of this node before splitting
     best_score = 1 - (y.sum() / m)**2 - ((m - y.sum()) / m)**2
     # a code optimization for pure nodes
     if (y==y[0]).all():
@@ -36,6 +37,10 @@ def split(x, y):
         # ensures at least 2 uniques (1 split) in x
         if (f == f[0]).all():
             continue
+        # Produce 3 arrays:
+        # 1) sorted unique values in f
+        # 2) count of each unique value (usually 1)
+        # 3) # of positives for each unique value
         sort_idx = f.argsort()
         fsort = f[sort_idx]
         ysort = y[sort_idx]
@@ -56,6 +61,7 @@ def split(x, y):
         npos = npos[:num_uniq]
         ntot = ntot[:num_uniq]
         
+        # Get cumulative counts/positives/negatives for each possible split
         nleft = ntot.cumsum()[:-1]
         npos_left = npos.cumsum()[:-1]
         nneg_left = nleft - npos_left
@@ -63,9 +69,12 @@ def split(x, y):
         npos_right = y.sum() - npos_left
         nneg_right = nright - npos_right
 
+        # Compute Gini impurity for each split
         gini_left = 1 - (npos_left/nleft)**2 - (nneg_left/nleft)**2
         gini_right = 1 - (npos_right/nright)**2 - (nneg_right/nright)**2
         gini_split = (nleft/m) * gini_left + (nright/m) * gini_right
+
+        # Select the best split
         score = gini_split.min()
         if score < best_score:
             best_score = score
