@@ -27,6 +27,9 @@ def split(x, y):
     best_feature = -1.0
     best_thr = 0.0
     best_score = 1 - (y.sum() / m)**2 - ((m - y.sum()) / m)**2
+    # a code optimization for pure nodes
+    if (y==y[0]).all():
+        return (best_feature, best_thr)
     # Iterate over features of x
     for feature_idx in range(n):
         f = x[:, feature_idx]
@@ -69,4 +72,4 @@ def split(x, y):
             best_feature = feature_idx
             split_idx = gini_split.argmin()
             best_thr = 0.5 * (uniq[split_idx] + uniq[split_idx + 1])
-    return (best_feature, best_thr, best_score)
+    return (best_feature, best_thr)

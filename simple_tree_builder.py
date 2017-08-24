@@ -20,7 +20,7 @@ author: David Thaler
 date: August 2017
 '''
 import numpy as np
-from gini_splitter import split
+from simple_splitter import split
 import numba
 
 # Position constants for the fields in the tree
@@ -51,10 +51,10 @@ def build_tree(x, y, node_num=0):
     '''
     ct = len(y)
     pos = y.sum()
-    feature, thr, _ = split(x, y)
+    feature, thr = split(x, y)
     if feature == -1.0:
         return np.array([[feature, thr, ct, pos, node_num, -1, -1]])
-    mask = x[:, feature] <= thr
+    mask = x[:, int(feature)] <= thr
     left_root = node_num + 1
     left_tree = build_tree(x[mask], y[mask], left_root)
     right_root = left_root + len(left_tree)
