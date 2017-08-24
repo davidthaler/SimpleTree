@@ -1,7 +1,7 @@
 # SimpleTree
 SimpleTree is an all-python decision tree classifier with key sections accelerated using Numba.
 
-##Goals
+## Goals
 This project aims to produce a decision tree classifier that is:   
 
 * readable and understandable by average programmers
@@ -9,7 +9,7 @@ This project aims to produce a decision tree classifier that is:
 * as accurate as scikit-learn DecisionTreeClassifier
 * fast enough to actually be used (within 2x of scikit-learn)
 
-##Usage
+## Usage
 
 Using the sklearn-compatible estimator class:
 
@@ -23,7 +23,7 @@ Or, using the functions in `simple_tree_builder` directly:
     mytree = simple_tree_builder.build_tree(x_train, y_train)
     pred = simple_tree_builder.predict(x_test)
 
-##Design
+## Design
 The code here has three parts:
 
 * splitter: `split()` in `simple_splitter.py` takes in data and returns the best feature and threshold to split on.
@@ -37,7 +37,7 @@ To keep this code as simple as possible, it only performs binary classification.
 It uses [Gini impurity](https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity) as its split criterion. 
 Trees are grown out full, so there are no capacity control parameters.
 
-###Data Format
+### Data Format
 The functions in `simple_tree_builder` create and consume the decision tree in an array format,
 in which each column of the array contains one type of data about the tree and each row contains 
 all of the data for one node.   
@@ -58,7 +58,7 @@ Node numbers start at 0, which is the root.
 
 This data format is pretty much masked if you use the sklearn-compatible estimator.
 
-##Performance
+## Performance
 
 On my machine, fitting an sklearn DecisionTreeClassifier on the iris data gives:
 
@@ -79,12 +79,12 @@ Using the `build_tree` function gives:
 
 So SimpleTree runs in about 1.5x the running time of sklearn's DecisionTreeClassifier on this data.
 
-##Requirements
+## Requirements
 * [Numba](http://numba.pydata.org/numba-doc/dev/index.html) Numba is a jit compiler for python that we use to accelerate key code sections.
 * pytest is needed if you want to run the tests.
 * [scikit-learn](http://scikit-learn.org/stable/index.html) is used in the tests.
 
-##Numba
+## Numba
 Numba is a just-in-time compiler (jit) for python code.
 It supports a only subset of standard python and the pydata stack (numpy/scipy/etc. ...), 
 so it can't be used everywhere.
