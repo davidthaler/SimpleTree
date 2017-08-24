@@ -52,9 +52,9 @@ def build_tree(x, y, node_num=0):
     ct = len(y)
     pos = y.sum()
     feature, thr = split(x, y)
-    if feature == -1.0:
+    if feature == -1:
         return np.array([[feature, thr, ct, pos, node_num, -1, -1]])
-    mask = x[:, int(feature)] <= thr
+    mask = x[:, feature] <= thr
     left_root = node_num + 1
     left_tree = build_tree(x[mask], y[mask], left_root)
     right_root = left_root + len(left_tree)

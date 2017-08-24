@@ -24,7 +24,7 @@ def split(x, y):
         3-tuple of feature index, split threshold and impurity of best split.
     '''
     m, n = x.shape
-    best_feature = -1.0
+    best_feature = -1
     best_thr = 0.0
     best_score = 1 - (y.sum() / m)**2 - ((m - y.sum()) / m)**2
     # a code optimization for pure nodes
