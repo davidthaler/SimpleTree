@@ -24,7 +24,6 @@ class SimpleTree():
         Returns:
             self; also fits the estimator
         '''
-        self.n_features_ = x.shape[1]
         self.tree_ = simple_tree_builder.build_tree(x, y)
         return self
 
