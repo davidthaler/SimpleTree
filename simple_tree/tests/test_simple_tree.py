@@ -26,7 +26,7 @@ import pytest
 import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import load_iris
-import simple_tree_builder as stb
+from simple_tree import simple_tree_builder as stb
 
 
 # Set up some test data

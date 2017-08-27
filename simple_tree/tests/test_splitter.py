@@ -17,7 +17,7 @@ date: August 2017
 '''
 import pytest
 import numpy as np
-from simple_splitter import split
+from simple_tree.simple_splitter import split
 
 '''
 Test Data:
