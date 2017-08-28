@@ -20,7 +20,7 @@ author: David Thaler
 date: August 2017
 '''
 import numpy as np
-from simple_tree.simple_splitter import split
+from .simple_splitter import split
 import numba
 
 # Position constants for the fields in the tree

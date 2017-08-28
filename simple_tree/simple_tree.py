@@ -5,7 +5,7 @@ All calls are fed through to functions in simple_tree_builder.
 author: David Thaler
 date: August 2017
 '''
-from simple_tree import simple_tree_builder
+from . import simple_tree_builder
 
 class SimpleTree():
     '''

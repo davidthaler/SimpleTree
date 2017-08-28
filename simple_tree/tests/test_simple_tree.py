@@ -17,7 +17,7 @@ or:
 
     >>> python -m pytest test_simple_tree.py
 
-...in this directory
+...from within the project or tests directory
 
 author: David Thaler
 date: August 2017
@@ -26,7 +26,7 @@ import pytest
 import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import load_iris
-from simple_tree import simple_tree_builder as stb
+from .. import simple_tree_builder as stb
 
 
 # Set up some test data
