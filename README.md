@@ -37,7 +37,10 @@ Or, using the functions in `simple_tree_builder` directly:
 
     from simple_tree import *
     mytree = build_tree(x_train, y_train)
-    pred = predict(x_test)
+    pred = predict(mytree, x_test)
+
+The `build_tree` function returns a numpy array that describes the tree.
+Then that is passed to `predict` or `apply`, along with new data for prediction.
 
 ## Design
 The code here has three parts:
