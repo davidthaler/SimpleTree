@@ -1,16 +1,15 @@
 # SimpleTree
-SimpleTree is an all-python decision tree classifier with key sections accelerated using Numba.
+SimpleTree is a python-only decision tree classifier.
 
 ## Goals
-This project aims to produce a decision tree classifier that is:   
+This project aims to produce an all-python decision tree classifier that is:   
 
-* readable and understandable by average programmers
-* hackable by average programmers
+* readable and hackable by average programmers
 * as accurate as scikit-learn DecisionTreeClassifier
-* fast enough to actually be used (within 2x of scikit-learn)
+* fast enough to actually be used on real data
 
 ## Requirements
-* [Numba](http://numba.pydata.org/numba-doc/dev/index.html) Numba is a jit compiler for python that we use to accelerate key code sections.
+* numpy is used throughout
 * pytest is needed if you want to run the tests.
 * [scikit-learn](http://scikit-learn.org/stable/index.html) is used in the tests.
 
@@ -51,7 +50,7 @@ The code here has three parts:
 compatible estimator from this code.
 
 All of the code is in python.
-Numba is used to accelerate the splitter and the apply function.
+To get reasonable speed, the numpy code is vectorized as far as possible.
 To keep this code as simple as possible, it only performs binary classification.
 It uses [Gini impurity](https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity) as its split criterion. 
 Trees are grown out full, so there are no capacity control parameters.
@@ -77,38 +76,45 @@ Node numbers start at 0, which is the root.
 
 This data format is masked if you use the sklearn-compatible estimator.
 
+## Accuracy
+
+On the spam data from the [CASI book](https://web.stanford.edu/~hastie/CASI_files/data.html) we get this comparison:
+
+    >> from sklearn.tree import DecisionTreeClassifier
+    >> from sklearn.metrics import ConfusionMatrix as cm
+    >> dt = DecisionTreeClassifier()
+    >> dt.fit(xtr, ytr)
+    >> sk_pred = dt.predict(xte)
+    >> cm(yte, sk_pred)
+    array([[861,  80],
+       [ 71, 524]])
+
+Versus SimpleTree:
+
+    >> from simple_tree import SimpleTree
+    >> st = SimpleTree()
+    >> st.fit(xtr, ytr)
+    >> st_pred = st.predict(xte)
+    >> cm(yte, st_pred)
+    array([[870,  71],
+       [ 57, 538]])
+
+...which is about the same. SimpleTree is deterministic, while DecisionTreeClassifier considers 
+the features in random order, so they won't give exactly the same results.
+
 ## Performance
 
-On my machine, fitting an sklearn DecisionTreeClassifier on the iris data gives:
+The spam data training set is of size 3065 x 57:
 
-    >> dt = DecisionTreeClassifier()
-    >> %timeit dt.fit(x, y)
-    1000 loops, best of 3: 336 µs per loop
+    >> %timeit st.fit(xtr, ytr)
+    1 loop, best of 3: 707 ms per loop
 
-Using SimpleTree :
+Predicting on the spam test set (size 1536 x 57)
 
-    >> st = SimpleTree()
-    >> %timeit st.fit(x, y)
-    1000 loops, best of 3: 499 µs per loop
+    >> %timeit st.predict(xte)
+    1000 loops, best of 3: 405 µs per loop
 
-Using the `build_tree` function gives:
-
-    >> %timeit build_tree(x, y)
-    1000 loops, best of 3: 520 µs per loop
-
-So SimpleTree runs in about 1.5x the running time of sklearn's DecisionTreeClassifier on this data.
-
-## Numba
-Numba is a just-in-time compiler (jit) for python code.
-It supports a only subset of standard python and the pydata stack (numpy/scipy/etc. ...), 
-so it can't be used everywhere.
-See numba's doc on [python suppport](http://numba.pydata.org/numba-doc/dev/reference/pysupported.html) for the standard language support
-Unlike [pypy](https://pypy.org/), numba does support numpy arrays and a large number of numpy functions. 
-See numba's doc on [numpy suppport](http://numba.pydata.org/numba-doc/dev/reference/numpysupported.html) for what parts are/are not supported.
-Support for recursion and OOP is experimental/unstable.
-This project uses it to accelerate key sections of the code, like the splitter.
-Numba can be difficult to get installed. 
-I recommend using the [Anaconda](https://docs.continuum.io/anaconda/) python distribution, which includes it.
+So it fits a realistic, smaller data set in about 0.7s and prediction is quite fast.
 
 ## Tests
 There is a small test suite in the `tests` directory. The tests require pytest and sklearn.

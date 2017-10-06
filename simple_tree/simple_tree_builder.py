@@ -21,7 +21,6 @@ date: August 2017
 '''
 import numpy as np
 from .simple_splitter import split
-import numba
 
 # Position constants for the fields in the tree
 FEATURE_COL = 0
@@ -63,7 +62,6 @@ def build_tree(x, y, node_num=0):
     return np.concatenate([root, left_tree, right_tree])
 
 
-@numba.jit
 def apply(tree, x):
     '''
     Finds the node number in the provided tree (from build_tree) that each
@@ -78,18 +76,21 @@ def apply(tree, x):
     Returns:
         1-D numpy array (dtype int) of leaf node numbers for each point in x.
     '''
-    out = np.zeros(len(x))
-    for k in range(len(x)):
-        node = 0                                    # the root
-        while tree[node, FEATURE_COL] >= 0:         # not a leaf
-            feature_num = int(tree[node, FEATURE_COL])
-            thr = tree[node, THR_COL]
-            if x[k, feature_num] <= thr:
-                node = int(tree[node, CHILD_LEFT_COL])
-            else:
-                node = int(tree[node, CHILD_RIGHT_COL])
-        out[k] = node
-    return out.astype(int)
+    n = len(x)
+    node = np.zeros(n, dtype=int)
+    active = np.ones(n).astype(bool)
+    while active.any():
+        active = (tree[node, CHILD_LEFT_COL] != -1)
+        xa = x[active]
+        na = node[active]
+        cfeat = (tree[na, FEATURE_COL]).astype(int)
+        cx = xa[np.arange(len(xa)), cfeat]
+        cthr = tree[na, THR_COL]
+        cleft = (tree[na, CHILD_LEFT_COL]).astype(int)
+        cright = (tree[na, CHILD_RIGHT_COL]).astype(int)
+        cnode = np.where(cx <= cthr, cleft, cright)
+        node[active] = cnode
+    return node
 
 
 def predict_proba(tree, x):
