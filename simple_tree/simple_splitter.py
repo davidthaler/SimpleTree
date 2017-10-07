@@ -23,23 +23,21 @@ def split(x, y):
     '''
     m, n = x.shape
     NO_SPLIT = (-1, 0.0)
-    # the Gini impurity of this node before splitting
     ys = y.sum()
+    # the Gini impurity of this node before splitting
     node_score = 1 - (ys / m)**2 - ((m - ys) / m)**2
     # check for pure nodes
     if node_score == 0:
         return NO_SPLIT
-    # Stores score, threshold for each feature (1 is a max value for gini)
+    # Stores score, threshold for each feature (1 > max value for gini)
     results = np.ones((n, 2))
     # Iterate over features of x
     for feature_idx in range(n):
-        f = x[:, feature_idx]
-
         # Produce 3 arrays:
-        # 1) unique values in f
+        # 1) unique values in feature
         # 2) count of each unique value (often 1)
         # 3) # of positives for each unique value
-        uniq, ubins = np.unique(f, return_inverse=True)
+        uniq, ubins = np.unique(x[:, feature_idx], return_inverse=True)
         # ensures at least 2 uniques (1 split) in x
         if len(uniq) == 1:
             continue
