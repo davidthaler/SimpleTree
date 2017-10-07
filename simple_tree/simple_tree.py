@@ -32,8 +32,6 @@ class SimpleTree():
         '''
         Finds the node number of the leaf each instance in x lands in
 
-        NB: using numba.jit w/o nopython=True option allows astype(int) at end
-
         Args:
             x: m x n numpy array of numeric features
 

@@ -1,7 +1,6 @@
 '''
-The split function here finds splits that minimize gini impurity.
-It runs under numba for speed, since these are the innermost loops in 
-decision tree fitting.
+The split function finds the split (feature index, feature value)
+that minimizes gini impurity.
 
 author: David Thaler
 date: August 2017
