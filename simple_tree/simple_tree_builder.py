@@ -11,16 +11,12 @@ Column definitions:
     5) Number of data points in this node
     6) Value of this node (mean label)
 
-The tree is the simplest decision tree that I know how to make.
-It does single-output, binary classification using the Gini impurity 
-criterion. The tree is always grown out full, so there are no capacity 
-control parameters.
-
 author: David Thaler
 date: August 2017
 '''
 import numpy as np
 from .simple_splitter import split
+
 
 # Position constants for the fields in the tree
 FEATURE_COL = 0
@@ -30,6 +26,7 @@ CHILD_LEFT_COL = 3
 CHILD_RIGHT_COL = 4
 CT_COL = 5
 VAL_COL = 6
+
 
 def build_tree(x, y, min_samples_leaf, depth_limit=-1, node_num=0):
     '''
@@ -48,7 +45,7 @@ def build_tree(x, y, min_samples_leaf, depth_limit=-1, node_num=0):
             default 0 is for the root node
 
     Returns:
-        2-D numpy array of dtype 'float' with 
+        2-D numpy array of dtype 'float' with data specifying the tree
     '''
     ct = len(y)
     val = y.sum() / ct
@@ -97,34 +94,11 @@ def apply(tree, x):
     return node
 
 
-def predict_proba(tree, x):
+def values(tree):
     '''
-    Predicts the probability of class 1 membership for each row in x
-    using the provided tree from build_tree.
-
-    Args:
-        tree: the array returned by build_tree
-        x: m x n numpy array of numeric features
+    Extractor for the value column of this tree.
 
     Returns:
-        1-D numpy array (dtype float) of probabilities of class 1 membership.
+        the values for the nodes in this tree
     '''
-    leaf_idx = apply(tree, x)
-    return tree[leaf_idx, VAL_COL]
-
-
-def predict(tree, x):
-    '''
-    Makes 0/1 predictions for the data x using the provided tree
-    from build_tree.
-
-    NB: predicts p=0.5 as False
-
-    Args:
-        tree: the array returned by build_tree
-        x: m x n numpy array of numeric features
-
-    Returns:
-        1-D numpy array (dtype float) of 0.0 and 1.0 for the two classes.
-    '''
-    return (predict_proba(tree, x) > 0.5).astype(int)
+    return tree[:, VAL_COL]

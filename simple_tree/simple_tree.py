@@ -1,11 +1,12 @@
 '''
-Bare-bones wrapper to get simple tree to be sklearn compatible.
-All calls are fed through to functions in simple_tree_builder.
+SimpleTree implements a decision tree classifier.
+The tree is a single-output binary classifier that runs on 0-1 labels.
 
 author: David Thaler
 date: August 2017
 '''
 from . import simple_tree_builder
+
 
 class SimpleTree():
     '''
@@ -25,6 +26,7 @@ class SimpleTree():
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
 
+
     def __repr__(self):
         '''
         Repr method of SimpleTree gives name and constructor params.
@@ -34,6 +36,7 @@ class SimpleTree():
         '''
         return ('SimpleTree(max_depth=%s, min_samples_leaf=%s)' % 
                     (self.max_depth, self.min_samples_leaf))
+
 
     def fit(self, x, y):
         '''
@@ -65,6 +68,33 @@ class SimpleTree():
         return simple_tree_builder.apply(self.tree_, x)
 
 
+    @property
+    def values(self):
+        '''
+        Node values of this tree.
+
+        Returns:
+            the values for the nodes in this tree
+        '''
+        return simple_tree_builder.values(self.tree_)
+
+
+    def decision_function(self, x):
+        '''
+        Returns a decision value for each point in x.
+        For classification tasks, this is a probablility of class 1 membership.
+        For regression tasks, it is a prediction.
+
+        Args:
+            x: m x n numpy array of numeric features
+
+        Returns:
+            1-D numpy array (dtype float) of decision function values.
+        '''
+        leaf_idx = self.apply(x)
+        return self.values[leaf_idx]
+
+
     def predict(self, x):
         '''
         Makes 0/1 predictions for the data x.
@@ -75,9 +105,9 @@ class SimpleTree():
             x: m x n numpy array of numeric features
 
         Returns:
-            1-D numpy array (dtype float) of 0.0 and 1.0 for the two classes
+            1-D numpy array (dtype int) of 0 and 1 for the two classes
         '''
-        return simple_tree_builder.predict(self.tree_, x)
+        return (self.predict_proba(x) > 0.5).astype(int)
 
 
     def predict_proba(self, x):
@@ -90,4 +120,4 @@ class SimpleTree():
         Returns:
             1-D numpy array (dtype float) of probabilities of class 1 membership
         '''
-        return simple_tree_builder.predict_proba(self.tree_, x)
+        return self.decision_function(x)
