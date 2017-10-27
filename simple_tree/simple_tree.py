@@ -13,6 +13,17 @@ class SimpleTree():
     build_tree, apply, predict and predict_proba.
     '''
 
+    def __init__(self, min_samples_leaf=1):
+        '''
+        A simple decision tree.
+
+        Args:
+            min_samples_leaf: minimum number of samples in a leaf;
+                default 1, must be >= 1
+        '''
+        self.min_samples_leaf = min_samples_leaf
+
+
     def fit(self, x, y):
         '''
         Fits this tree to with the provided training data
@@ -24,7 +35,7 @@ class SimpleTree():
         Returns:
             self; also fits the estimator
         '''
-        self.tree_ = simple_tree_builder.build_tree(x, y)
+        self.tree_ = simple_tree_builder.build_tree(x,y, self.min_samples_leaf)
         return self
 
 
