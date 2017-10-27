@@ -33,7 +33,7 @@ def split(x, y, min_samples_leaf):
     # Stores score, threshold for each feature (1 > max value for gini)
     results = np.ones((n, 2))
     # Iterate over features of x
-    for feature_idx in range(n):
+    for feature_idx in np.random.permutation(n):
         # Produce 3 arrays:
         # 1) unique values in feature
         # 2) count of each unique value (often 1)
