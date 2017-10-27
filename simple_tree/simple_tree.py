@@ -13,14 +13,16 @@ class SimpleTree():
     build_tree, apply, predict and predict_proba.
     '''
 
-    def __init__(self, min_samples_leaf=1):
+    def __init__(self, max_depth=None, min_samples_leaf=1):
         '''
         A simple decision tree.
 
         Args:
+            max_depth: maximum depth of tree, of None (default) for no limit
             min_samples_leaf: minimum number of samples in a leaf;
                 default 1, must be >= 1
         '''
+        self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
 
     def __repr__(self):
@@ -30,7 +32,8 @@ class SimpleTree():
         Returns:
             String representation of self
         '''
-        return 'SimpleTree(min_samples_leaf=%s)' % self.min_samples_leaf
+        return ('SimpleTree(max_depth=%s, min_samples_leaf=%s)' % 
+                    (self.max_depth, self.min_samples_leaf))
 
     def fit(self, x, y):
         '''
@@ -43,7 +46,9 @@ class SimpleTree():
         Returns:
             self; also fits the estimator
         '''
-        self.tree_ = simple_tree_builder.build_tree(x,y, self.min_samples_leaf)
+        max_depth = -1 if self.max_depth is None else self.max_depth
+        self.tree_ = simple_tree_builder.build_tree(x, y, 
+                            self.min_samples_leaf, max_depth)
         return self
 
 

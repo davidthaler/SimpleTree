@@ -31,7 +31,7 @@ CHILD_RIGHT_COL = 4
 CT_COL = 5
 VAL_COL = 6
 
-def build_tree(x, y, min_samples_leaf, node_num=0):
+def build_tree(x, y, min_samples_leaf, depth_limit=-1, node_num=0):
     '''
     Recursively build a decision tree. 
     Returns a 2-D array of shape (num_nodes x 7) that describes the tree.
@@ -42,6 +42,8 @@ def build_tree(x, y, min_samples_leaf, node_num=0):
         x: m x n numpy array of numeric features
         y: m-element 1-D numpy array of labels; must be 0-1.
         min_samples_leaf: minimum number of samples in a leaf, must be >= 1
+        depth_limit: maximum depth of tree/subtree below this node
+            returns when =0; default of -1 yields no depth limit
         node_num: the node number of this node
             default 0 is for the root node
 
@@ -50,14 +52,18 @@ def build_tree(x, y, min_samples_leaf, node_num=0):
     '''
     ct = len(y)
     val = y.sum() / ct
+    if depth_limit == 0:
+        return np.array([[-1, 0.0, node_num, -1, -1, ct, val]])
     feature, thr, _, _ = split(x, y, min_samples_leaf)
     if feature == -1:
         return np.array([[feature, thr, node_num, -1, -1, ct, val]])
     mask = x[:, feature] <= thr
     left_root = node_num + 1
-    left_tree = build_tree(x[mask], y[mask], min_samples_leaf, left_root)
+    left_tree = build_tree(x[mask], y[mask], min_samples_leaf, 
+                                depth_limit - 1, left_root)
     right_root = left_root + len(left_tree)
-    right_tree = build_tree(x[~mask], y[~mask], min_samples_leaf, right_root)
+    right_tree = build_tree(x[~mask], y[~mask], min_samples_leaf, 
+                                depth_limit - 1, right_root)
     root = np.array([[feature, thr, node_num, left_root, right_root, ct, val]])
     return np.concatenate([root, left_tree, right_tree])
 
