@@ -5,11 +5,11 @@ contained in a numpy array.
 Column definitions:
     0) Split feature, -1 if leaf
     1) Split threshold
-    2) Number of data points in this node
-    3) Number of positives in this node
-    4) Node number of this node (nodes are numbered in pre-order).
-    5) Node number of left child, -1 if leaf
-    6) Node number of right child, -1 if leaf
+    2) Node number of this node (nodes are numbered in pre-order).
+    3) Node number of left child, -1 if leaf
+    4) Node number of right child, -1 if leaf
+    5) Number of data points in this node
+    6) Value of this node (mean label)
 
 The tree is the simplest decision tree that I know how to make.
 It does single-output, binary classification using the Gini impurity 
@@ -25,12 +25,11 @@ from .simple_splitter import split
 # Position constants for the fields in the tree
 FEATURE_COL = 0
 THR_COL = 1
-CT_COL = 2
-POS_COL = 3
-NODE_NUM_COL = 4
-CHILD_LEFT_COL = 5
-CHILD_RIGHT_COL = 6
-
+NODE_NUM_COL = 2
+CHILD_LEFT_COL = 3
+CHILD_RIGHT_COL = 4
+CT_COL = 5
+VAL_COL = 6
 
 def build_tree(x, y, min_samples_leaf, node_num=0):
     '''
@@ -50,16 +49,16 @@ def build_tree(x, y, min_samples_leaf, node_num=0):
         2-D numpy array of dtype 'float' with 
     '''
     ct = len(y)
-    pos = y.sum()
+    val = y.sum() / ct
     feature, thr, _, _ = split(x, y, min_samples_leaf)
     if feature == -1:
-        return np.array([[feature, thr, ct, pos, node_num, -1, -1]])
+        return np.array([[feature, thr, node_num, -1, -1, ct, val]])
     mask = x[:, feature] <= thr
     left_root = node_num + 1
     left_tree = build_tree(x[mask], y[mask], min_samples_leaf, left_root)
     right_root = left_root + len(left_tree)
     right_tree = build_tree(x[~mask], y[~mask], min_samples_leaf, right_root)
-    root = np.array([[feature, thr, ct, pos, node_num, left_root, right_root]])
+    root = np.array([[feature, thr, node_num, left_root, right_root, ct, val]])
     return np.concatenate([root, left_tree, right_tree])
 
 
@@ -105,9 +104,7 @@ def predict_proba(tree, x):
         1-D numpy array (dtype float) of probabilities of class 1 membership.
     '''
     leaf_idx = apply(tree, x)
-    tot = tree[leaf_idx, CT_COL]
-    pos = tree[leaf_idx, POS_COL]
-    return pos / tot
+    return tree[leaf_idx, VAL_COL]
 
 
 def predict(tree, x):
