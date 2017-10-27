@@ -23,6 +23,14 @@ class SimpleTree():
         '''
         self.min_samples_leaf = min_samples_leaf
 
+    def __repr__(self):
+        '''
+        Repr method of SimpleTree gives name and constructor params.
+
+        Returns:
+            String representation of self
+        '''
+        return 'SimpleTree(min_samples_leaf=%s)' % self.min_samples_leaf
 
     def fit(self, x, y):
         '''
