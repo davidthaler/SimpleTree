@@ -14,8 +14,7 @@ from . import simple_splitter
 
 class SimpleTree():
     '''
-    SimpleTree is a simple sklearn-compatible class built over the functions
-    build_tree, apply, predict and predict_proba.
+    SimpleTree is a base class for sklearn-compatible decision tree estimators.
     '''
 
     def fit(self, x, y):
@@ -30,8 +29,10 @@ class SimpleTree():
             self; also fits the estimator
         '''
         max_depth = -1 if self.max_depth is None else self.max_depth
+        max_features = (x.shape[1] if self.max_features is None
+                            else self.max_features)
         self.tree_ = simple_tree_builder.build_tree(x, y, self.split_fn,
-                            self.min_samples_leaf, max_depth)
+                            self.min_samples_leaf, max_features, max_depth)
         return self
 
     def apply(self, x):
@@ -71,24 +72,40 @@ class SimpleTree():
         leaf_idx = self.apply(x)
         return self.values[leaf_idx]
 
+    def __repr__(self):
+        '''
+        Repr method of SimpleTree gives class name and constructor params.
+
+        Returns:
+            String representation of self
+        '''
+        name = self.__class__.__name__
+        return ('%s(min_samples_leaf=%s, max_features=%s, max_depth=%s)' %
+                    (name, self.min_samples_leaf, self.max_features,
+                    self.max_depth))
+
 
 class ClassificationTree(SimpleTree):
     '''
     ClassificationTree implements a decision tree with a gini impurity
     split criterion.
     '''
-    
-    def __init__(self, max_depth=None, min_samples_leaf=1):
+
+    def __init__(self, min_samples_leaf=1, max_features=None, max_depth=None):
         '''
-        A simple decision tree.
+        A simple decision tree classifier using gini impurity as the
+        split criterion.
 
         Args:
-            max_depth: maximum depth of tree, of None (default) for no limit
             min_samples_leaf: minimum number of samples in a leaf;
                 default 1, must be >= 1
+            max_features: max number of features to try per split;
+                default of None for all features
+            max_depth: maximum depth of tree, of None (default) for no limit
         '''
-        self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
+        self.max_features = max_features
+        self.max_depth = max_depth
         self.split_fn = simple_splitter.gini_split
     
     def predict(self, x):
@@ -117,33 +134,27 @@ class ClassificationTree(SimpleTree):
         '''
         return self.decision_function(x)
 
-    def __repr__(self):
-        '''
-        Repr method of ClassificationTree gives name and constructor params.
-
-        Returns:
-            String representation of self
-        '''
-        return ('ClassificationTree(max_depth=%s, min_samples_leaf=%s)' % 
-                    (self.max_depth, self.min_samples_leaf))
-
 
 class RegressionTree(SimpleTree):
     '''
     RegressionTree implements a decision tree regressor that minimizes
     residual sum of squares or, equivalently, mse.
     '''
-    def __init__(self, max_depth=None, min_samples_leaf=1):
+
+    def __init__(self, min_samples_leaf=1, max_features=None, max_depth=None):
         '''
-        A simple decision tree.
+        A decision tree regressor that minimizes residual sum of squares.
 
         Args:
-            max_depth: maximum depth of tree, of None (default) for no limit
             min_samples_leaf: minimum number of samples in a leaf;
                 default 1, must be >= 1
+            max_features: max number of features to try per split;
+                default of None for all features
+            max_depth: maximum depth of tree, of None (default) for no limit
         '''
-        self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
+        self.max_features = max_features
+        self.max_depth = max_depth
         self.split_fn = simple_splitter.mse_split
 
     def predict(self, x):
@@ -158,14 +169,6 @@ class RegressionTree(SimpleTree):
         '''
         return self.decision_function(x)
 
-    def __repr__(self):
-        '''
-        Repr method of RegressionTree gives name and constructor params.
 
-        Returns:
-            String representation of self
-        '''
-        return ('RegressionTree(max_depth=%s, min_samples_leaf=%s)' % 
-                    (self.max_depth, self.min_samples_leaf))
 
     
