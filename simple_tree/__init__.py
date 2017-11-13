@@ -1,6 +1,6 @@
 '''
 Bring module classes up to package namespace.
 '''
-from .simple_tree import SimpleTree
+from .simple_tree import RegressionTree, ClassificationTree
 
-__all__ = ['SimpleTree']
+__all__ = ['RegressionTree', 'ClassificationTree']
