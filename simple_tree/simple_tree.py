@@ -57,6 +57,16 @@ class SimpleTree():
         '''
         return simple_tree_builder.values(self.tree_)
 
+    @values.setter
+    def values(self, vals):
+        '''
+        Update the leaf node values for this tree
+
+        Args:
+            vals: the new leaf node values
+        '''
+        self.tree_[:, simple_tree_builder.VAL_COL] = vals
+
     def decision_function(self, x):
         '''
         Returns a decision value for each point in x.
