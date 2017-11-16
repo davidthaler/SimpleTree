@@ -98,7 +98,8 @@ class SimpleTree():
 class ClassificationTree(SimpleTree):
     '''
     ClassificationTree implements a decision tree with a gini impurity
-    split criterion.
+    split criterion. It does single-output, binary classification and
+    requires 0-1 labels.
     '''
 
     def __init__(self, min_samples_leaf=1, max_features=None, max_depth=None):

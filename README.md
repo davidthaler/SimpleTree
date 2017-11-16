@@ -1,17 +1,20 @@
 # SimpleTree
-SimpleTree is a python-only decision tree classifier.
+SimpleTree is a python-only package of decision trees and tree ensemble models.
+It has decision tree, random forest and gradient boosting models for 
+binary classification and regression.
 
 ## Goals
-This project aims to produce an all-python decision tree classifier that is:   
+This project aims to produce python-only tree and tree ensemble models that are:   
 
 * readable and hackable by average programmers
 * as accurate as scikit-learn DecisionTreeClassifier
-* fast enough to actually be used on real data
+* fast enough to be used on real data
 
 ## Requirements
-* numpy is used throughout
-* pytest is needed if you want to run the tests.
-* [scikit-learn](http://scikit-learn.org/stable/index.html) is used in the tests.
+
+* numpy
+* pandas is used for loading the included sample datasets
+* [scikit-learn](http://scikit-learn.org/stable/index.html) is used in the examples.
 
 ## Installation
 This package is not on pypi, so you need to clone from github. Then you can install with pip.
@@ -25,101 +28,147 @@ show up when you `import simple_tree`.
 
 ## Usage
 
-Using the sklearn-compatible estimator class:
+There are sample datasets in the `datasets/` package. 
+These are loaded with named functions.
+Here we load the spam data from the [CASI book](https://web.stanford.edu/~hastie/CASI_files/data.html).
 
-    from simple_tree import SimpleTree
-    st = SimpleTree()
-    st.fit(x_train, y_train)
-    pred = st.predict(x_test)
+    >> from simple_tree.datasets import load_spam
+    >> xtr, ytr, xte, yte = load_spam()
 
-Or, using the functions in `simple_tree_builder` directly:     
+The decision tree, random forest and gradient boosting models implement 
+fit/predict methods as in sklearn.
+Fitting and predicting with a `ClassificationTree`:
 
-    from simple_tree import *
-    mytree = build_tree(x_train, y_train)
-    pred = predict(mytree, x_test)
+    >> from simple_tree import ClassificationTree
+    >> mytree = ClassifcationTree(min_samples_leaf=5)
+    >> mytree.fit(xtr, ytr)
+    >> pred = mytree.predict(xte)
 
-The `build_tree` function returns a numpy array that describes the tree.
-Then that is passed to `predict` or `apply`, along with new data for prediction.
+Fitting and predicting with an `RFClassifier`:
 
-## Design
-The code here has three parts:
+    >> from simple_tree import RFClassifier
+    >> myrf = RFClassifier(n_trees=30, min_samples_leaf=5)
+    >> myrf.fit(xtr, ytr)
+    >> pred = mytree.predict(xte)
 
-* splitter: `split()` in `simple_splitter.py` takes in data and returns the best feature and threshold to split on.
-* tree builder: `simple_tree_builder.py` contains `build_tree()`, which builds the tree recursively.
-* sklearn interface: `simple_tree.py` contains a simple class to make an scikit-learn 
-compatible estimator from this code.
+Using a `GBClassifier`:
 
-All of the code is in python.
-To get reasonable speed, the numpy code is vectorized as far as possible.
-To keep this code as simple as possible, it only performs binary classification.
-It uses [Gini impurity](https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity) as its split criterion. 
-Trees are grown out full, so there are no capacity control parameters.
+    >> from simple_tree import GBClassifier
+    >> mygbm = GBClassifier()
+    >> mygbm.fit(xtr, ytr)
+    >> pred = mygbm.predict(xte)
 
-### Data Format
-The functions in `simple_tree_builder` create and consume the decision tree in an array format,
-in which each column of the array contains one type of data about the tree and each row contains 
-all of the data for one node.   
+The usage for regression models is similar. 
+See `help(model)` for the parameters of each particular model. 
+There are more extensive usage examples in the `examples/` directory. 
+The examples are run as:
 
-The column definitions are:
+    >> python spam_example.py
 
-0. Column index in x of the split feature, -1 if leaf
-1. Split threshold, 0.0 if leaf
-2. Number of data points in this node
-3. Number of positives in this node
-4. Node number of this node
-5. Node number of left child, -1 if this node is a leaf
-6. Node number of right child, -1 if this node is a leaf 
-
-For example, tree[1, 1] holds the split threshold for node number 1.
-The nodes are numbered in [preorder](https://en.wikipedia.org/wiki/Tree_traversal#Pre-order) (root, left subtree, right subtree). 
-Node numbers start at 0, which is the root.    
-
-This data format is masked if you use the sklearn-compatible estimator.
+## Limitations
+The classifiers only do single-output binary classification with 0-1 labels.
+Regression models only do single output least-squares regression.
+Models do not take sample weights or class weights.
+Models in SimpleTree implement part of the scikit-learn estimator API,
+but not `get_param/set_params` or `score`, so they do not interoperate 
+with hyperparameter search functions in sklearn.model_selection.
 
 ## Accuracy
-
-On the spam data from the [CASI book](https://web.stanford.edu/~hastie/CASI_files/data.html) we get this comparison:
+Models in SimpleTree generally match the corresponding models in 
+scikit-learn for accuracy. Here we compare a `DecisionTreeClassifier` 
+from scikit-learn to `ClassificationTree`.
 
     >> from sklearn.tree import DecisionTreeClassifier
     >> from sklearn.metrics import ConfusionMatrix as cm
-    >> dt = DecisionTreeClassifier()
+    >> dt = DecisionTreeClassifier(min_samples_leaf=5)
     >> dt.fit(xtr, ytr)
     >> sk_pred = dt.predict(xte)
     >> cm(yte, sk_pred)
-    array([[861,  80],
-       [ 71, 524]])
+    array([[875,  66],
+           [ 65, 530]])
 
-Versus SimpleTree:
+We get a similar result from `ClassificationTree`:
 
-    >> from simple_tree import SimpleTree
-    >> st = SimpleTree()
+    >> from simple_tree import ClassificationTree
+    >> st = ClassificationTree(min_samples_leaf=5)
     >> st.fit(xtr, ytr)
     >> st_pred = st.predict(xte)
     >> cm(yte, st_pred)
-    array([[870,  71],
-       [ 57, 538]])
+    array([[874,  67],
+           [ 61, 534]])
 
-...which is about the same. SimpleTree is deterministic, while DecisionTreeClassifier considers 
-the features in random order, so they won't give exactly the same results.
+Next we compare a `GradientBoostingClassifier` from scikit-learn 
+to a `GBClassifier` from SimpleTree:
+
+    >> from sklearn.metrics import log_loss
+    >> from sklearn.ensemble import GradientBoostingClassifier
+    >> gbm = GradientBoostingClassifer()
+    >> gbm.fit(xtr, ytr)
+    >> cm(yte, gbm.predict(xte))
+    array([[903,  38],
+           [ 44, 551]])
+    >> log_loss(yte, gbm.predict_proba(xte))
+    0.15015159848399615
+    >> from simple_tree import GBClassifier
+    >> mygbm = GBClassifier()
+    >> mygbm.fit(xtr, ytr)
+    >> cm(yte, mygbm.predict(xte))
+    array([[904,  37],
+           [ 44, 551]])
+    >> log_loss(yte, mygbm.predict_proba(xte))
+    0.14861460234660964
+
+Finally we compare a `RandomForestClassifier` to an `RFClassifier`:
+
+    >> from sklearn.ensemble import RandomForestClassifier
+    >> rf = RandomForestClassifier(n_estimators=30, min_samples_leaf=5)
+    >> rf.fit(xtr, ytr)
+    >> cm(yte, rf.predict(xte))
+    array([[907,  34],
+           [ 59, 536]])
+    >> from simple_tree import RFClassifier
+    >> myrf = RFClassifier(n_trees=30, min_samples_leaf=5)
+    >> myrf.fit(xtr, ytr)
+    >> cm(yte, myrf.predict(xte))
+    array([[910,  31],
+           [ 50, 545]])
+
+The examples in the `examples/` directory output accuracy/confusion matrix
+ or mean squared error.
 
 ## Performance
 
-The spam data training set is of size 3065 x 57:
+For the spam data training set (3065 x 57). Fitting a `ClassificationTree`:
 
     >> %timeit st.fit(xtr, ytr)
-    1 loop, best of 3: 707 ms per loop
+    1 loop, best of 3: 605 ms per loop
 
-Predicting on the spam test set (size 1536 x 57)
+Predicting on the spam test set (1536 x 57):
 
     >> %timeit st.predict(xte)
-    1000 loops, best of 3: 405 µs per loop
+    1000 loops, best of 3: 3.59 ms per loop
 
 So it fits a realistic, smaller data set in about 0.7s and prediction is quite fast.
+For the gradient boosting model, with 100 trees and depth 3, we get:
 
-## Tests
-There is a small test suite in the `tests` directory. The tests require pytest and sklearn.
-You can run the tests with:
+    >> %timeit mygbm.fit(xtr, ytr)
+    1 loop, best of 3: 5.74 s per loop
+    >> %timeit mygbm.predict(xte)
+    10 loops, best of 3: 83.2 ms per loop
 
-    >> python -m pytest
+Note, however, that these times are considerably slower that scikit-learn, 
+which makes extensive use of compiled (cython) extensions.
+There are wall-clock timings on the scripts in the `examples` folder.
 
-from the project root or the tests directory.
+## Extending GBM
+The gradient boosting models provided in SimpleTree implement single-output, 
+binary classification and least-squares regression. To extend the model to 
+other objective functions, subclass `simple_tree.simple_gbm.SimpleGBM` and 
+implement the three functions:
+
+* `start_gbm`: compute the base estimate and initial pseudo-residual.
+* `update_leaves`: update the leaf values after learning each base estimator
+* `update_residual`: compute the new pseudo-residual.
+
+You will also need to implement `predict` and similar, but the base class has
+`decision_function`.

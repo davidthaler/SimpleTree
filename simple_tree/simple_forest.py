@@ -20,7 +20,7 @@ class SimpleForest():
         n_trees: number of trees to use in model
         other: same as underlying tree type
     '''
-    def __init__(self, n_trees, min_samples_leaf=1, max_features=None,
+    def __init__(self, n_trees=30, min_samples_leaf=1, max_features=None,
                     max_depth=None):
         self.n_trees = n_trees
         self.min_samples_leaf = min_samples_leaf
@@ -84,6 +84,7 @@ class SimpleForest():
 class RFClassifier(SimpleForest):
     '''
     Concrete class extending SimpleForest as a classification model.
+    It does single-output, binary classification and requires 0-1 labels.
 
     Args:
         see SimpleForest

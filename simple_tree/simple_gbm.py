@@ -155,10 +155,10 @@ class GBRegressor(SimpleGBM):
 
 class GBClassifier(SimpleGBM):
     '''
-    GBClassifier extends SimpleGBM to implement a binary gradient boosting
-    classifier (bernoulli loss). It implements the required methods: start_gbm,
-    update_leaves and update_residual. It also implements predict and
-    predict_proba.
+    GBClassifier extends SimpleGBM to implement a single-output, binary 
+    gradient boosting classifier (bernoulli loss). It implements the 
+    required methods: start_gbm, update_leaves and update_residual.
+    It also implements predict and predict_proba. 
     '''
 
     def start_gbm(self, y):

@@ -1,6 +1,7 @@
 '''
 This example compares accuracy and runtime of simple_tree.ClassificationTree
-and sklearn.DecisionTreeClassifier on the spam dataset.
+and sklearn.DecisionTreeClassifier on the spam dataset from the 
+simple_tree.datasets package.
 '''
 from time import time
 from sklearn.tree import DecisionTreeClassifier

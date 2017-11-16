@@ -1,7 +1,7 @@
 '''
 This example compares an sklearn.ensemble.GradientBoostingRegressor to a
 simple_tree.simple_gbm.GBRegressor. The GBRegressor is as accurate, but a
-lot slower.
+lot slower. The data is the diabetes data from simple_tree.datasets.
 '''
 from time import time
 from sklearn.metrics import mean_squared_error as mse

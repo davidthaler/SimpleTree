@@ -2,6 +2,7 @@
 This example compares sklearn.ensemble.RandomForestClassifier 
 to simple_tree.simple_forest.RFClassifier for accuracy and
 running time. The accuracy is close. The running time is not.
+The data is the spam data from simple_tree.datasets.
 '''
 from time import time
 from sklearn.ensemble import RandomForestClassifier
