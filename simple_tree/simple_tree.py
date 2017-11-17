@@ -8,8 +8,70 @@ squared error or, equivalently, residual sum of squares.
 author: David Thaler
 date: August 2017
 '''
-from . import simple_tree_builder
+import numpy as np
 from . import simple_splitter
+
+'''
+The tree is represented internally as an array with several data fields.
+Column definitions:
+    0) Split feature, -1 if leaf
+    1) Split threshold
+    2) Node number of this node (nodes are numbered in pre-order).
+    3) Node number of left child, -1 if leaf
+    4) Node number of right child, -1 if leaf
+    5) Number of data points in this node
+    6) Value of this node (mean label)
+'''
+FEATURE_COL = 0
+THR_COL = 1
+NODE_NUM_COL = 2
+CHILD_LEFT_COL = 3
+CHILD_RIGHT_COL = 4
+CT_COL = 5
+VAL_COL = 6
+
+
+def build_tree(x, y, split_fn, min_samples_leaf, max_features,
+                    depth_limit=-1, node_num=0):
+    '''
+    Recursively build a decision tree. 
+    Returns a 2-D array of shape (num_nodes x 7) that describes the tree.
+    Each row represents a node in pre-order (root, left, right).
+    See the module comment for the column definitions.
+
+    Args:
+        x: m x n numpy array of numeric features
+        y: m-element 1-D numpy array of labels; must be 0-1.
+        split_fn: one of simple_splitter.gini_split/mse_split or similar
+        min_samples_leaf: minimum number of samples in a leaf, must be >= 1
+        max_features: (int) max number of features to try per split
+        depth_limit: maximum depth of tree/subtree below this node
+            returns when =0; default of -1 yields no depth limit
+        node_num: the node number of this node
+            default 0 is for the root node
+
+    Returns:
+        2-D numpy array of dtype 'float' with data specifying the tree
+    '''
+    ct = len(y)
+    val = y.sum() / ct
+    if depth_limit == 0:
+        return np.array([[-1, 0.0, node_num, -1, -1, ct, val]])
+    col_idx = np.random.choice(x.shape[1], size=max_features, replace=False)
+    subfeature, thr, _, _ = split_fn(x[:, col_idx], y, min_samples_leaf)
+    if subfeature == -1:
+        return np.array([[-1, 0.0, node_num, -1, -1, ct, val]])
+    # NB: subfeature is relative to x[:, col_idx], must change back
+    feature = col_idx[subfeature]
+    mask = x[:, feature] <= thr
+    left_root = node_num + 1
+    left_tree = build_tree(x[mask], y[mask], split_fn, min_samples_leaf, 
+                                max_features, depth_limit - 1, left_root)
+    right_root = left_root + len(left_tree)
+    right_tree = build_tree(x[~mask], y[~mask], split_fn, min_samples_leaf, 
+                                max_features, depth_limit - 1, right_root)
+    root = np.array([[feature, thr, node_num, left_root, right_root, ct, val]])
+    return np.concatenate([root, left_tree, right_tree])
 
 
 class SimpleTree():
@@ -31,8 +93,8 @@ class SimpleTree():
         max_depth = -1 if self.max_depth is None else self.max_depth
         max_features = (x.shape[1] if self.max_features is None
                             else self.max_features)
-        self.tree_ = simple_tree_builder.build_tree(x, y, self.split_fn,
-                            self.min_samples_leaf, max_features, max_depth)
+        self.tree_ = build_tree(x, y, self.split_fn, self.min_samples_leaf,
+                                max_features, max_depth)
         return self
 
     def apply(self, x):
@@ -45,7 +107,21 @@ class SimpleTree():
         Returns:
             1-D numpy array (dtype int) of leaf node numbers for each point in x
         '''
-        return simple_tree_builder.apply(self.tree_, x)
+        n = len(x)
+        node = np.zeros(n, dtype=int)
+        active = np.ones(n).astype(bool)
+        while active.any():
+            active = (self.tree_[node, CHILD_LEFT_COL] != -1)
+            xa = x[active]
+            na = node[active]
+            cfeat = (self.tree_[na, FEATURE_COL]).astype(int)
+            cx = xa[np.arange(len(xa)), cfeat]
+            cthr = self.tree_[na, THR_COL]
+            cleft = (self.tree_[na, CHILD_LEFT_COL]).astype(int)
+            cright = (self.tree_[na, CHILD_RIGHT_COL]).astype(int)
+            cnode = np.where(cx <= cthr, cleft, cright)
+            node[active] = cnode
+        return node
 
     @property
     def values(self):
@@ -55,7 +131,7 @@ class SimpleTree():
         Returns:
             the values for the nodes in this tree
         '''
-        return simple_tree_builder.values(self.tree_)
+        return self.tree_[:, VAL_COL]
 
     @values.setter
     def values(self, vals):
@@ -65,7 +141,7 @@ class SimpleTree():
         Args:
             vals: the new leaf node values
         '''
-        self.tree_[:, simple_tree_builder.VAL_COL] = vals
+        self.tree_[:, VAL_COL] = vals
 
     def decision_function(self, x):
         '''
