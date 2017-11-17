@@ -172,3 +172,9 @@ implement the three functions:
 
 You will also need to implement `predict` and similar, but the base class has
 `decision_function`.
+
+## Tests
+There are some tests in the `tests/` directory. They require scikit-learn. 
+To run them, go to the project directory and enter:
+
+    >> python -m unittest -v
